@@ -1,0 +1,52 @@
+version: '3.1'
+
+services:
+  api:
+    build:
+      context: .
+    environment:
+      - DB_HOSTNAME=db
+      - DB_USERNAME=root
+      - DB_PASSWORD=admin
+      - DB_DATABASE=fast_api_wallet
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    networks:
+      - mysql-compose-network
+
+  db:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+    ports:
+      - "3306:3306"
+    networks:
+      - mysql-compose-network
+    volumes:
+      - D:\Documentos\repos\fast_api_wallet\docs\database:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
+
+#  broker:
+#      image: rabbitmq:3-management
+#      environment:
+#          - RABBITMQ_DEFAULT_USER=admin
+#          - RABBITMQ_DEFAULT_PASS=secret
+#          - RABBITMQ_DEFAULT_VHOST=canaa-local
+#      ports:
+#        - "15672:15672"
+#        - "5672:5672"
+#      healthcheck:
+#        test: ["CMD", "curl", "-f", "http://localhost:5672"]
+#        interval: 1s
+#        timeout: 1s
+#        retries: 50
+
+networks:
+  mysql-compose-network:
+    driver: bridge
